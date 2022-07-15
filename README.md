@@ -121,6 +121,8 @@ The response looks like this:
 ## Future work
 
 - Implement monitoring
-- Create a new task that can be configured for hyperparameter search process.
+- Create a new task to load configurations from files and use it for:
+  - hyperparameter search process.
+  - flow parameters
 - Create a logger decorator for pipeline tasks to avoid duplicated code.
 - Create a docker image for pipeline execution with slim-buster
