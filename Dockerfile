@@ -1,17 +1,13 @@
-FROM tiangolo/uvicorn-gunicorn:python3.8-slim
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
 ARG MODEL_VERSION
 
 WORKDIR /app
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV MODULE_NAME=app
+COPY requirements_app.txt .
+COPY artifacts/pipeline-model-$MODEL_VERSION.joblib .
 
-COPY requirements.txt .
-COPY artifacts/pipeline-model-$MODEL_VERSION.pkl .
+RUN pip install -r requirements_app.txt
+
 COPY ./app /app/app
-
-RUN pip install -r requirements.txt \
-    && rm -rf /root/.cache
-
-#ENTRYPOINT ["uvicorn", "main:app"]
+COPY ./src /app/src

@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+from src import __version__
 from typing import List
 
 
@@ -9,9 +10,9 @@ def load_deps() -> List[str]:
 
 
 setup(
-    name='bain-challenge',
+    name='Bain-challenge',
     packages=find_packages(),
-    version='0.1.0',
+    version=__version__,
     description='Bain challenge for MLE',
     author='cristobal.vasquezf@gmail.com',
     install_requires=load_deps(),

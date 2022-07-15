@@ -32,14 +32,6 @@ def model_pipeline_definition() -> Pipeline:
     return pipe
 
 
-def model_serialization(grid_model: GridSearchCV, save_model_dir: str) -> None:
-    model_path = os.path.join(save_model_dir, f"pipeline-model-{__version__}.pkl")
-    logger = prefect.context.get("logger")
-    logger.info(f"Saving serialized model in {model_path}")
-    joblib.dump(grid_model.best_estimator_, model_path)
-    logger.info("Model serialized successfully")
-
-
 # TODO: this grid can be loaded from a config file using a pipeline parameter for easier experimentation
 def grid_definition() -> dict:
     grid = {"selector__k": [3, 4, 5, 6, 7, 10],
@@ -61,9 +53,11 @@ def hyperparameter_tuning(model_pipeline: Pipeline, x_train: pd.DataFrame, y_tra
 
 
 def generate_feature_subsets(df_x: pd.DataFrame) -> List[List[str]]:
-    df_x_cols_filtered_milk = [column for column in df_x.columns if 'leche' not in column]
+    # The dataset without columns that contains "leche" word doesn't apply then is commented,
+    # but the function to explore more than dataset is available
+    # df_x_cols_filtered_milk = [column for column in df_x.columns if 'leche' not in column]
     df_x_cols_all = df_x.columns
-    return [df_x_cols_filtered_milk, df_x_cols_all]
+    return [df_x_cols_all]
 
 
 def model_generation(data: Tuple[pd.DataFrame, pd.DataFrame], test_size: float) -> Model:
@@ -85,7 +79,6 @@ def model_generation(data: Tuple[pd.DataFrame, pd.DataFrame], test_size: float) 
     model = model_pipeline_definition()
     grid_model = hyperparameter_tuning(model, x_train, y_train, grid)
     y_predicted = grid_model.predict(x_test)
-
     rmse, r2 = model_evaluation(y_test, y_predicted)
 
     return Model(model=grid_model, rmse=rmse, r2=r2, features=list(x_train.columns))

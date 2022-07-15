@@ -1,3 +1,4 @@
+import prefect
 import pandas as pd
 import src.utils as utils
 
@@ -13,6 +14,8 @@ def process_pib_columns(df: pd.DataFrame):
     """
     cols_pib = [x for x in list(df.columns) if 'PIB' in x]
     cols_pib.append('Periodo')
+    logger = prefect.context.get("logger")
+    logger.debug(f"Bank data pib columns {cols_pib}")
     df_pib = df[cols_pib].dropna(how='any', axis=0)
     period_column = df_pib["Periodo"]
     # apply the conversion to all columns except Periodo which is the last one in cols_pib list
@@ -33,6 +36,8 @@ def process_imacec_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     cols_imacec = [x for x in list(df.columns) if 'Imacec' in x]
     cols_imacec.extend(['Periodo'])
+    logger = prefect.context.get("logger")
+    logger.debug(f"Bank data imacec columns {cols_imacec}")
     df_imacec = df[cols_imacec].dropna(how='any', axis=0)
     for col in cols_imacec:
         if col == 'Periodo':
@@ -54,7 +59,8 @@ def process_iv(df: pd.DataFrame) -> pd.DataFrame:
     :param df: dataframe with central bank data.
     :return: Dataframe processed.
     """
-    df_iv = df[['Indice_de_ventas_comercio_real_no_durables_IVCM', 'Periodo']]
+    cols_iv = ['Indice_de_ventas_comercio_real_no_durables_IVCM', 'Periodo']
+    df_iv = df[cols_iv]
     df_iv = df_iv.dropna()
     df_iv = df_iv.sort_values(by='Periodo', ascending=True)
     df_iv['num'] = df_iv.Indice_de_ventas_comercio_real_no_durables_IVCM.apply(
@@ -72,6 +78,8 @@ def load_and_clean_central_bank_data(file: str) -> pd.DataFrame:
     :return: Dataframe processed and cleaned.
     """
     df_bank = pd.read_csv(file)
+    logger = prefect.context.get("logger")
+    logger.debug(f"Bank dataset original columns {df_bank.columns}")
     df_bank["Periodo"] = df_bank["Periodo"].apply(utils.match_date)
     # TODO: in this step errors parameter is setted as coerce and it could be an issue.
     #  Check date format for this dataset.
