@@ -20,14 +20,6 @@ class FlowTestSuite(unittest.TestCase):
     def setUp(self) -> None:
         self.num_tasks = 17
         self.flow = flow_definition("milk-flow-test")
-        self.tasks = ['load_and_preprocess_milk_data_task',
-                      'load_and_preprocess_central_bank_data_task', 'process_pib_columns_task',
-                      'process_imacec_columns_task', 'join_precipitations_milk_data_task', 'select_best_model_task',
-                      'load_and_preprocess_precipitations_data_task', 'process_iv_task',
-                      'join_preprocess_bank_data_task', 'join_preprocess_milk_bank_data_task',
-                      'generate_datasets_task',
-                      'model_generation_task', 'model_serialization_task']
-        self.parameters = ['file_precipitation_path', 'file_milk_path', 'file_bank_path', 'save_model_dir']
 
     def test_check_flow_tasks(self):
         flow_tasks_names = list(map(lambda x: x.name, self.flow.tasks))
