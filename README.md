@@ -69,19 +69,14 @@ export PREFECT__LOGGING__LEVEL=DEBUG
 ## Endpoint usage
 
 To test the generated model in an endpoint it's necessary to have docker installed on your machine.
-With docker installed run the follow command to generate the docker image locally:
+With docker installed run the follow command to generate the docker image locally and deploy it with fastapi, \
+note that here we are providing the model version with the param -v:
 
 ```
-docker build --build-arg MODEL_VERSION=0.1.0 -t ml-milk-app:latest .
+sh deploy_endpoint.sh -v 0.1.0
 ```
 
-To run the fastapi server with docker run the follow command:
-
-```
-docker run -d --name milk-api -p 80:80 ml-milk-app:latest
-```
-
-Finally to test the endpoint locally, here we provide an example:
+To check that endpoint is working send a request like this one:
 
 ```
 curl -X POST "http://127.0.0.1:80/milk-price/predict" -H\
@@ -98,7 +93,7 @@ curl -X POST "http://127.0.0.1:80/milk-price/predict" -H\
 The response looks like this:
 
 ```
-{"prediction":[208.47223831852565]}
+{"prediction":[204.8994310474284]]}
 ```
 
 ## Decisions
@@ -107,7 +102,6 @@ The response looks like this:
 - If the data is in an external data source it's necessary create a new task just for data loading with retry mechanism
   provided by prefect.
 - The api was developed with FastAPI.
-- The coverage was not addressed with priority.
 - Logging is implemented with priority in order to check info, errors and debugging.
 - There are two docker files:
     - Dockerfile: this one correspond to FastAPI image
@@ -125,4 +119,7 @@ The response looks like this:
   - hyperparameter search process.
   - flow parameters
 - Create a logger decorator for pipeline tasks to avoid duplicated code.
-- Create a docker image for pipeline execution with slim-buster
+- Create a docker image for pipeline execution and include in them build stage and test stage.
+- Receive the data to predict as json instead of list. In this way the prediction is safer because the attribute is mapped to his value.
+  - Example: {"feat_1" : value_1, "feat_2": value_2....."feat_n": value_n}
+- Implement unit tests

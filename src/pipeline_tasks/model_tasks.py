@@ -7,6 +7,7 @@ from prefect import task
 from src.model.model import model_generation, generate_feature_subsets
 from src.containers import Model
 from src import __version__
+from pathlib import Path
 
 
 @task
@@ -43,9 +44,18 @@ def select_best_model_task(models: List[Model]) -> Model:
 
 @task
 def model_serialization_task(model: Model, save_model_dir: str) -> None:
+    """
+
+    :param model: model to serialize
+    :param save_model_dir: a relative path where to store the model.
+                           If the provided path doesn't exists a one will be created.
+    :return:
+    """
     logger = prefect.context.get("logger")
     logger.info(f"Saving model on {save_model_dir}")
     logger.info(f"Model version {__version__}")
+    if not os.path.exists(save_model_dir):
+        os.makedirs(os.path.join(os.getcwd(), save_model_dir))
     model_path = os.path.join(save_model_dir, f"pipeline-model-{__version__}.joblib")
-    joblib.dump(model.model.best_estimator_, model_path)
+    joblib.dump(model.model.best_estimator_, Path(model_path))
     logger.info(f"Model serialized successfully")

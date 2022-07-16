@@ -52,27 +52,32 @@ def parameters_definition() -> dict:
     }
 
 
-@click.command()
-@click.option("-p", "--parallel", type=bool, default=False, show_default=True,
-              help="Boolean flag to run the pipeline in parallel")
-@click.option("-w", "--workers", type=int, default=4, show_default=True,
-              help="Number of workers to be used in parallel execution")
-def run_pipeline(parallel: bool, workers: int) -> state:
-    """
-    Pipeline execution to train milk price model.
-    """
-    logger = prefect.context.get("logger")
-    start = time.perf_counter()
+def run_pipeline(parallel: bool = False, workers: int = 4) -> state:
     flow = flow_definition("milk_price_flow")
     parameters = parameters_definition()
     state = flow.run(
         parameters=parameters,
         executor=None if parallel else LocalDaskExecutor(scheduler="threads", num_workers=workers)
     )
+    return state
+
+
+@click.command()
+@click.option("-p", "--parallel", type=bool, default=False, show_default=True,
+              help="Boolean flag to run the pipeline in parallel")
+@click.option("-w", "--workers", type=int, default=4, show_default=True,
+              help="Number of workers to be used in parallel execution")
+def run_pipeline_command(parallel: bool, workers: int) -> state:
+    """
+    Pipeline execution to train milk price model.
+    """
+    logger = prefect.context.get("logger")
+    start = time.perf_counter()
+    state = run_pipeline(parallel, workers)
     end = time.perf_counter()
     logger.info(f"Pipeline execution time: {end - start}")
     return state
 
 
 if __name__ == "__main__":
-    run_pipeline()
+    run_pipeline_command()
